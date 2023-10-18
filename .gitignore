@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+/prisma/client
+/prisma/schema.prisma
+/prisma/node_modules

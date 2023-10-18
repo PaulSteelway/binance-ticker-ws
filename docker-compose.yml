@@ -1,0 +1,42 @@
+version: '3'
+services:
+  # Контейнер для PostgreSQL
+  postgres:
+    image: postgres:16
+    container_name: my_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+  # Контейнер для Node.js проекту
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: binance_ticker_ws
+    depends_on:
+      - postgres
+      - redis
+    # command: ["npx", "prisma", "migrate", "deploy"]
+    command: ["npm","run","start:migrate:prod"]
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      REDIS_HOST: redis
+      # Додаткові змінні середовища для вашого проекту
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "3000:3000"
+  # Контейнер для Redis
+  redis:
+    image: redis:7.2.1
+    container_name: my_redis
+    ports:
+      - "6379:6379"
